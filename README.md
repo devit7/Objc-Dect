@@ -4,9 +4,9 @@ Using yolo 8
 
 ## Contoh hasil implementasi versi 12/18/2024
 
-[![Demo 1](https://img.youtube.com/vi/Htff2jgCag4/0.jpg)](https://www.youtube.com/shorts/Htff2jgCag4)
+[![Demo 1](https://img.youtube.com/vi/Htff2jgCag4/0.jpg)](https://www.youtube.com/watch?v=Htff2jgCag4)
 
-[![Demo 2](https://img.youtube.com/vi/fGMMiqRtuSQ/0.jpg)](https://www.youtube.com/shorts/fGMMiqRtuSQ)
+[![Demo 2](https://img.youtube.com/vi/fGMMiqRtuSQ/0.jpg)](https://www.youtube.com/watch?v=fGMMiqRtuSQ)
 
 ## Getting Started
 
