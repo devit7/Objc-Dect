@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ class _DetectionPageState extends State<DetectionPage> {
   // Variable untuk menyimpan widget yang ditampilkan
   Widget currentView = Center(
     child: ElevatedButton(
-      onPressed: null, // Placeholder (akan diperbaiki di constructor)
+      onPressed: null, 
       child: Text('START YOLO'),
     ),
   );
@@ -56,9 +57,7 @@ class _DetectionPageState extends State<DetectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: currentView,
-      ),
+      body:  currentView,
     );
   }
 }
@@ -94,8 +93,10 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
     await flutterTts.setSpeechRate(0.5); // Kecepatan bicara
   }
 
+// Fungsi untuk memulai proses voice
   Future<void> startSpeech() async {
-    speechTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
+    // delay 10 detik ( bisa di turunnin kok :] )
+    speechTimer = Timer.periodic(Duration(seconds: 6), (timer) async {
       if (detectedObjects.isNotEmpty) {
         // Hitung jumlah setiap jenis objek
         Map<String, int> objectCount = {};
@@ -103,13 +104,23 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
           objectCount[obj] = (objectCount[obj] ?? 0) + 1;
         }
 
-        // Buat teks ucapan berdasarkan jumlah objek
-        String speech = 'Ada object terdeteksi ';
+        // terjemahan label objek ke bahasa Indonesia dari file JSON
+        final String translationJson =
+            await rootBundle.loadString('assets/translation.json');
+        final Map<String, dynamic> labelTranslations =
+            json.decode(translationJson);
+
+        //  voice berdasarkan jumlah objek
+        String speech = 'Ada objek terdeteksi ';
         objectCount.forEach((key, value) {
+          // Cek apakah label ada di list translationJson
+          String labelInIndonesian = labelTranslations[key] ??
+              key; // pakek label asli jika tidak ada di list
+
           if (value > 1) {
-            speech += '$value $key, ';
+            speech += '$value $labelInIndonesian, ';
           } else {
-            speech += '$key, ';
+            speech += '$labelInIndonesian, ';
           }
         });
 
@@ -120,6 +131,12 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
         await flutterTts.speak(speech);
       }
     });
+  }
+
+// Kalkulasi jarak antara kamera dan objek
+  double calculateDistance(
+      double boundingBoxSize, double realObjectSize, double focalLength) {
+    return (focalLength * realObjectSize) / boundingBoxSize;
   }
 
   @override
@@ -174,42 +191,71 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
                                       .toList();
                                 }
                                 return detections == null
-                                        ? Container()
-                                        : Stack(
-                                            children: detections.map((detectedObject) {
-                                              final boundingBox = detectedObject!.boundingBox;
+                                    ? Container()
+                                    : Stack(
+                                        children:
+                                            detections.map((detectedObject) {
+                                          final boundingBox =
+                                              detectedObject!.boundingBox;
+                                        // untuk persiapan kalkulasi jarak
+                                          // Ukuran bounding box (contoh menggunakan tinggi)
+                                          final boundingBoxHeight =
+                                              boundingBox.height;
 
-                                              return Positioned(
-                                                left: boundingBox.left,
-                                                top: boundingBox.top,
-                                                width: boundingBox.width,
-                                                height: boundingBox.height,
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.transparent,
-                                                    border: Border.all(color: Colors.blueAccent, width: 2),
-                                                    borderRadius: BorderRadius.circular(5),
-                                                  ),
-                                                  child: SingleChildScrollView(
-                                                    child: Column(
-                                                      children: [
-                                                        Text(
-                                                          detectedObject.label,
-                                                          style: TextStyle(color: Colors.white, fontSize: 16),
-                                                        ),
-                                                        Text(
-                                                          (detectedObject.confidence * 100)
-                                                              .toInt()
-                                                              .toString(),
-                                                          style: TextStyle(color: Colors.white, fontSize: 16),
-                                                        )
-                                                      ],
+                                          // Ukuran objek sebenarnya (contoh: botol tinggi 20 cm)
+                                          const realObjectSize = 20.0; // note: data mentah
+
+                                          // Fokal kamera (contoh eksperimen: 700)
+                                          const focalLength = 700.0; // note: data mentah
+
+                                          // Kalkulasi jarak
+                                          final distance = calculateDistance(
+                                              boundingBoxHeight,
+                                              realObjectSize,
+                                              focalLength);
+                                          // bikin kotak hasil deteksi
+                                          return Positioned(
+                                            left: boundingBox.left,
+                                            top: boundingBox.top,
+                                            width: boundingBox.width,
+                                            height: boundingBox.height,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.transparent,
+                                                border: Border.all(
+                                                    color: Colors.blueAccent,
+                                                    width: 2),
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
+                                              ),
+                                              child: SingleChildScrollView(
+                                                child: Column(
+                                                  children: [
+                                                    Text(
+                                                      detectedObject.label,
+                                                      style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 16),
                                                     ),
-                                                  ),
+                                                    Text(
+                                                      'Akurasi: ${(detectedObject.confidence * 100).toInt()}%',
+                                                      style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 16),
+                                                    ),
+                                                    Text(
+                                                      'Jarak: ${distance.toStringAsFixed(2)} cm',
+                                                      style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 16),
+                                                    ),
+                                                  ],
                                                 ),
-                                              );
-                                            }).toList(),
+                                              ),
+                                            ),
                                           );
+                                        }).toList(),
+                                      );
                               },
                             ),
                             StreamBuilder<double?>(
@@ -269,7 +315,7 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
       },
     );
   }
-
+// Inisialisasi model deteksi objek dari plugin
   Future<ObjectDetector> _initObjectDetectorWithLocalModel() async {
     final modelPath = await _copy('assets/yolov8n_int8.tflite');
     final metadataPath = await _copy('assets/metadata.yaml');
@@ -284,6 +330,7 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
     return ObjectDetector(model: model);
   }
 
+  // Salin file dari asset ke direktori aplikasi (default plugin)
   Future<String> _copy(String assetPath) async {
     final path = '${(await getApplicationSupportDirectory()).path}/$assetPath';
     await io.Directory(dirname(path)).create(recursive: true);
@@ -296,6 +343,7 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
     return file.path;
   }
 
+  // chek permission app untuk kamera dll 
   Future<bool> _checkPermissions() async {
     List<Permission> permissions = [];
 
@@ -317,6 +365,7 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
   }
 }
 
+// buat hitungan fps dan inference time
 class Times extends StatelessWidget {
   const Times({
     super.key,
@@ -348,7 +397,3 @@ class Times extends StatelessWidget {
   }
 }
 
-class LTVoice  {
-  
-  List<DetectedObject?>? detections;
-}

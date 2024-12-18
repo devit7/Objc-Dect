@@ -1,6 +1,14 @@
 # ultra_yolo
 
-A new Flutter project.
+Using yolo 8
+
+## Contoh hasil implementasi versi 12/18/2024
+
+[![Demo 1] ] // Thumbnail
+(https://github.com/devit7/Objc-Dect/blob/main/part1.mp4)   
+
+[![Demo 2] ] // Thumbnail
+(https://github.com/devit7/Objc-Dect/blob/main/part2.mp4)
 
 ## Getting Started
 
