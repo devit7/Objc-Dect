@@ -1,10 +1,11 @@
 # ultra_yolo
 
 Using yolo 8
++voice indonesia
 
 plugin : ultralytics_yolo
 
-## Contoh hasil implementasi versi 12/18/2024
+## Contoh hasil implementasi versi 12/18/2024 dengan voice indonesia
 
 [![Demo 1](https://img.youtube.com/vi/Htff2jgCag4/0.jpg)](https://www.youtube.com/watch?v=Htff2jgCag4)
 
