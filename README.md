@@ -4,9 +4,9 @@ Using yolo 8
 
 ## Contoh hasil implementasi versi 12/18/2024
 
-![Demo 1](https://github.com/devit7/Objc-Dect/blob/main/part1.mp4)   
+[![Demo 1](https://img.youtube.com/vi/Htff2jgCag4/0.jpg)](https://www.youtube.com/shorts/Htff2jgCag4)
 
-![Demo 2](https://github.com/devit7/Objc-Dect/blob/main/part2.mp4)
+[![Demo 2](https://img.youtube.com/vi/fGMMiqRtuSQ/0.jpg)](https://www.youtube.com/shorts/fGMMiqRtuSQ)
 
 ## Getting Started
 
