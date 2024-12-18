@@ -173,7 +173,43 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
                                       .map((detection) => detection!.label)
                                       .toList();
                                 }
-                                return Container();
+                                return detections == null
+                                        ? Container()
+                                        : Stack(
+                                            children: detections.map((detectedObject) {
+                                              final boundingBox = detectedObject!.boundingBox;
+
+                                              return Positioned(
+                                                left: boundingBox.left,
+                                                top: boundingBox.top,
+                                                width: boundingBox.width,
+                                                height: boundingBox.height,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.transparent,
+                                                    border: Border.all(color: Colors.blueAccent, width: 2),
+                                                    borderRadius: BorderRadius.circular(5),
+                                                  ),
+                                                  child: SingleChildScrollView(
+                                                    child: Column(
+                                                      children: [
+                                                        Text(
+                                                          detectedObject.label,
+                                                          style: TextStyle(color: Colors.white, fontSize: 16),
+                                                        ),
+                                                        Text(
+                                                          (detectedObject.confidence * 100)
+                                                              .toInt()
+                                                              .toString(),
+                                                          style: TextStyle(color: Colors.white, fontSize: 16),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            }).toList(),
+                                          );
                               },
                             ),
                             StreamBuilder<double?>(
