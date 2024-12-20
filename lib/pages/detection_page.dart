@@ -12,7 +12,7 @@ import 'package:ultralytics_yolo/ultralytics_yolo.dart';
 import 'package:ultralytics_yolo/yolo_model.dart';
 
 class DetectionPage extends StatefulWidget {
-  const DetectionPage({Key? key}) : super(key: key);
+  const DetectionPage({super.key});
   @override
   State<DetectionPage> createState() => _DetectionPageState();
 }
@@ -65,14 +65,16 @@ class _DetectionPageState extends State<DetectionPage> {
 class YoloRealTimeView extends StatefulWidget {
   final VoidCallback onStop;
 
-  const YoloRealTimeView({Key? key, required this.onStop}) : super(key: key);
+  const YoloRealTimeView({super.key, required this.onStop});
 
   @override
   _YoloRealTimeViewState createState() => _YoloRealTimeViewState();
 }
 
 class _YoloRealTimeViewState extends State<YoloRealTimeView> {
-  final controller = UltralyticsYoloCameraController();
+  final controller = UltralyticsYoloCameraController(
+    deferredProcessing: true
+  );
   final FlutterTts flutterTts = FlutterTts();
   List<String> detectedObjects = [];
   bool isSpeaking = false; // Untuk mencegah overlapping suara
