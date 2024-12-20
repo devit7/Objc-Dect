@@ -21,7 +21,7 @@ class _DetectionPageState extends State<DetectionPage> {
   // Variable untuk menyimpan widget yang ditampilkan
   Widget currentView = Center(
     child: ElevatedButton(
-      onPressed: null, 
+      onPressed: null,
       child: Text('START YOLO'),
     ),
   );
@@ -57,7 +57,7 @@ class _DetectionPageState extends State<DetectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:  currentView,
+      body: currentView,
     );
   }
 }
@@ -73,7 +73,7 @@ class YoloRealTimeView extends StatefulWidget {
 
 class _YoloRealTimeViewState extends State<YoloRealTimeView> {
   final controller = UltralyticsYoloCameraController(
-    deferredProcessing: true
+    deferredProcessing: true,
   );
   final FlutterTts flutterTts = FlutterTts();
   List<String> detectedObjects = [];
@@ -95,7 +95,7 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
     await flutterTts.setSpeechRate(0.5); // Kecepatan bicara
   }
 
-// Fungsi untuk memulai proses voice
+  // Fungsi untuk memulai proses voice
   Future<void> startSpeech() async {
     // delay 10 detik ( bisa di turunnin kok :] )
     speechTimer = Timer.periodic(Duration(seconds: 6), (timer) async {
@@ -125,12 +125,14 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
             speech += '$labelInIndonesian, ';
           }
         });
-
         // Hilangkan koma terakhir
         speech = speech.trim().replaceAll(RegExp(r',$'), '');
 
         // Ucapkan teks
         await flutterTts.speak(speech);
+
+        // bersihkan detectedObjects
+        detectedObjects.clear();
       }
     });
   }
@@ -179,9 +181,11 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
                               controller: controller,
                               predictor: predictor,
                               onCameraCreated: () {
+                                // Load model saat kamera siap
                                 predictor.loadModel(useGpu: true);
                               },
                             ),
+
                             StreamBuilder<List<DetectedObject?>?>(
                               stream: predictor.detectionResultStream,
                               builder: (context, snapshot) {
@@ -192,6 +196,7 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
                                       .map((detection) => detection!.label)
                                       .toList();
                                 }
+
                                 return detections == null
                                     ? Container()
                                     : Stack(
@@ -199,16 +204,18 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
                                             detections.map((detectedObject) {
                                           final boundingBox =
                                               detectedObject!.boundingBox;
-                                        // untuk persiapan kalkulasi jarak
+                                          // untuk persiapan kalkulasi jarak
                                           // Ukuran bounding box (contoh menggunakan tinggi)
                                           final boundingBoxHeight =
                                               boundingBox.height;
 
                                           // Ukuran objek sebenarnya (contoh: botol tinggi 20 cm)
-                                          const realObjectSize = 20.0; // note: data mentah
+                                          const realObjectSize =
+                                              20.0; // note: data mentah
 
                                           // Fokal kamera (contoh eksperimen: 700)
-                                          const focalLength = 700.0; // note: data mentah
+                                          const focalLength =
+                                              700.0; // note: data mentah
 
                                           // Kalkulasi jarak
                                           final distance = calculateDistance(
@@ -223,36 +230,55 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
                                             height: boundingBox.height,
                                             child: Container(
                                               decoration: BoxDecoration(
-                                                color: Colors.transparent,
+                                                color: Colors.black.withOpacity(
+                                                    0.3), // Tambahkan latar belakang semi transparan
                                                 border: Border.all(
-                                                    color: Colors.blueAccent,
-                                                    width: 2),
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                              ),
-                                              child: SingleChildScrollView(
-                                                child: Column(
-                                                  children: [
-                                                    Text(
-                                                      detectedObject.label,
-                                                      style: const TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 16),
-                                                    ),
-                                                    Text(
-                                                      'Akurasi: ${(detectedObject.confidence * 100).toInt()}%',
-                                                      style: const TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 16),
-                                                    ),
-                                                    Text(
-                                                      'Jarak: ${distance.toStringAsFixed(2)} cm',
-                                                      style: const TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 16),
-                                                    ),
-                                                  ],
+                                                  color: Colors.blueAccent,
+                                                  width: 2,
                                                 ),
+                                                borderRadius: BorderRadius.circular(
+                                                    8), // Radius lebih besar agar lebih halus
+                                              ),
+                                              padding: const EdgeInsets.all(
+                                                  8), // Tambahkan padding untuk jarak dalam kotak
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment
+                                                    .center, // Pusatkan teks di tengah
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment
+                                                        .start, // Teks rata kiri
+                                                children: [
+                                                  Text(
+                                                    // jika ada label person maka akan diubah menjadi
+                                                    detectedObject.label,
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight
+                                                          .bold, // Teks tebal agar lebih menonjol
+                                                    ),
+                                                  ),
+                                                  const SizedBox(
+                                                      height:
+                                                          4), // Spasi antar elemen
+                                                  Text(
+                                                    'Akurasi: ${(detectedObject.confidence * 100).toInt()}%',
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(
+                                                      height:
+                                                          4), // Spasi antar elemen
+                                                  Text(
+                                                    '(${distance.toStringAsFixed(2)} cm)',
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           );
@@ -317,6 +343,7 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
       },
     );
   }
+
 // Inisialisasi model deteksi objek dari plugin
   Future<ObjectDetector> _initObjectDetectorWithLocalModel() async {
     final modelPath = await _copy('assets/yolov8n_int8.tflite');
@@ -345,7 +372,7 @@ class _YoloRealTimeViewState extends State<YoloRealTimeView> {
     return file.path;
   }
 
-  // chek permission app untuk kamera dll 
+  // chek permission app untuk kamera dll
   Future<bool> _checkPermissions() async {
     List<Permission> permissions = [];
 
@@ -398,4 +425,3 @@ class Times extends StatelessWidget {
     );
   }
 }
-
